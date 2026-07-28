@@ -10,7 +10,7 @@ from langchain_community.vectorstores import FAISS
 # Set up clean page layout
 st.set_page_config(page_title="Documentation RAG Assistant", page_icon="🤖")
 st.title("🤖 Data Center Analytics Chatbot")
-st.caption("Optimized for speed with Llama 3.2 (1B) & Streamed Responses")
+st.caption("Optimized for accuracy with Qwen 2.5 (1.5B) & Precision Markdown Splitting")
 
 # 1. Initialize RAG Chain with Caching
 @st.cache_resource
@@ -24,25 +24,30 @@ def initialize_rag_chain():
     with open("Documentation.md", "r", encoding="utf-8") as f:
         raw_text = f.read()
 
-    # Split text logically by Markdown headers
-    headers_to_split_on = [("#", "Header 1"), ("##", "Header 2"), ("###", "Header 3")]
+    # MATCHED TO YOUR EXACT FORMAT: Splitting logically by your main sections and item sub-headers
+    headers_to_split_on = [
+        ("###", "Main Section"),
+        ("#####", "Sub Item")
+    ]
     markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
     md_header_splits = markdown_splitter.split_text(raw_text)
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=250)
+    # Sub-split long blocks cleanly while preserving header metadata
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=150)
     splits = text_splitter.split_documents(md_header_splits)
 
     # Core AI and vector store linking
     embeddings = OllamaEmbeddings(model="nomic-embed-text", base_url="http://127.0.0.1:11434")
     db = FAISS.from_documents(splits, embeddings)
     
-    # 1B model for high-speed performance
-    llm = OllamaLLM(model="llama3.2:1b", base_url="http://127.0.0.1:11434")
+    # 1.5B model for high-speed technical reasoning
+    llm = OllamaLLM(model="qwen2.5:1.5b", base_url="http://127.0.0.1:11434")
 
     system_prompt = (
         "You are an expert technical documentation assistant.\n"
-        "Analyze the retrieved context thoroughly to answer the user's question accurately.\n"
-        "If you do not know the answer based on the context, state that clearly.\n\n"
+        "Analyze the provided context thoroughly to answer the user's question accurately.\n"
+        "Provide direct, factual answers. Do not make assumptions or infer things outside the context.\n"
+        "If the context does not contain the answer, say 'I cannot find that information in the document.'\n\n"
         "Context:\n{context}"
     )
     prompt = ChatPromptTemplate.from_messages([
@@ -79,15 +84,15 @@ with st.sidebar:
             "**How It Works:**\n"
             "1. **Parsing:** Reads a local raw markdown file.\n"
             "2. **Vector Search:** Converts text chunks into vectors using `nomic-embed-text`.\n"
-            "3. **Inference:** Queries Meta's `Llama 3.2 (1B)` model via **Ollama** completely offline."
+            "3. **Inference:** Queries Meta's `Qwen 2.5 (1.5B)` model via **Ollama** completely offline."
         )
     
     st.markdown(
         "<div style='margin-top: 5px; margin-bottom: 5px; padding: 0px; font-size: 14px; line-height: 1.3;'>"
         "<strong>Tech Stack:</strong><br>"
-        "• Parsing: Markdown Headers<br>"
+        "• Parsing: Markdown Header Splits<br>"
         "• Vectors: <code>nomic-embed-text</code><br>"
-        "• LLM: <code>Llama 3.2 (1B)</code> via Ollama<br><br>"
+        "• LLM: <code>Qwen 2.5 (1.5B)</code> via Ollama<br><br>"
         "<strong>💡 Sample Prompt:</strong><br>"
         "<em>'Summarize the AI involvement'</em>"
         "</div>", 
@@ -107,15 +112,12 @@ with st.sidebar:
 
     # ==================== PORTFOLIO BRANDING FOOTER ====================
     st.markdown("<hr style='margin: 15px 0px 8px 0px; padding: 0px; border: none; border-top: 1px solid #ccc;'/>", unsafe_allow_html=True)
-    
-    # 📝 EDIT HERE: Replace "Your Name" and the GitHub link with your actual details!
     st.markdown(
-        "<div style='text-align: center; font-size: 12px; color: #777; margin-top: 5px;'>"
+        "<div style='text-align: center; font-size: 12px; color: #777; margin-top: 5px;'>\n"
         "Built by <a href='https://github.com' target='_blank' style='text-decoration: none; color: #000000; font-weight: bold;'>Jingfeng Xia</a>"
         "</div>",
         unsafe_allow_html=True
     )
-    # ===================================================================
 
 # Dynamic retriever generation based on user sidebar selection
 retriever = vector_db.as_retriever(search_kwargs={"k": num_chunks})
