@@ -44,7 +44,7 @@ def initialize_rag_chain():
 
     # Connects to high-speed model on Groq's servers using your hidden API Key
     api_key = st.secrets["GROQ_API_KEY"]
-    llm = ChatGroq(model="qwen-2.5-32b", groq_api_key=api_key)
+    llm = ChatGroq(model="qwen/qwen3.6-27b", groq_api_key=api_key)
 
     system_prompt = (
         "You are an expert technical documentation assistant.\n"
