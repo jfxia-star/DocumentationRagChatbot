@@ -37,11 +37,23 @@ def initialize_rag_chain():
     splits = text_splitter.split_documents(md_header_splits)
 
     # Core AI and vector store linking
-    embeddings = OllamaEmbeddings(model="nomic-embed-text", base_url="http://127.0.0.1:11434")
-    db = FAISS.from_documents(splits, embeddings)
+    # embeddings = OllamaEmbeddings(model="nomic-embed-text", base_url="http://127.0.0.1:11434")
+    # db = FAISS.from_documents(splits, embeddings)
     
     # 1.5B model for high-speed technical reasoning
-    llm = OllamaLLM(model="qwen2.5:1.5b", base_url="http://127.0.0.1:11434")
+    # llm = OllamaLLM(model="qwen2.5:1.5b", base_url="http://127.0.0.1:11434")
+
+    # New Cloud Version
+    from langchain_groq import ChatGroq
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+
+    # Free, serverless embeddings that run completely inside the cloud container
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    db = FAISS.from_documents(splits, embeddings)
+
+    # Connects to high-speed model on Groq's servers using your hidden API Key
+    api_key = st.secrets["GROQ_API_KEY"]
+    llm = ChatGroq(model="qwen2.5:1.5b", groq_api_key=api_key)
 
     system_prompt = (
         "You are an expert technical documentation assistant.\n"
