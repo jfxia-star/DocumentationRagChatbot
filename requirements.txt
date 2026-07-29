@@ -4,3 +4,5 @@ langchain-core
 langchain-text-splitters
 langchain-community
 faiss-cpu
+langchain-groq
+sentence-transformers
