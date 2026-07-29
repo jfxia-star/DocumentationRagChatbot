@@ -95,7 +95,7 @@ with st.sidebar:
         "• Vectors: <code>all-MiniLM-L6-v2</code><br>"
         "• LLM: <code>Qwen 2.5 (1.5B)</code> via Groq Cloud<br><br>"
         "<strong>💡 Sample Prompt:</strong><br>"
-        "<em>'Summarize the AI involvement'</em>"
+        "<em>'Are there any AI items in the report?'</em>"
         "</div>", 
         unsafe_allow_html=True
     )
