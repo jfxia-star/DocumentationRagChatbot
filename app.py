@@ -142,27 +142,27 @@ if user_query := st.chat_input("Ask your chatbot something..."):
         
         retrieved_docs = retriever.invoke(user_query)
         context_str = "\n\n".join(doc.page_content for doc in retrieved_docs)
-
+        
         full_response = ""
         try:
             for chunk in rag_chain.stream({"context": context_str, "question": user_query}):
                 full_response += chunk
-
+                
                 # Clean up and hide the <think> tags if they are streaming in
                 display_response = full_response
                 if "</think>" in display_response:
                     display_response = display_response.split("</think>")[-1].strip()
                 elif "<think>" in display_response:
                     display_response = "🤖 *Thinking...*"
-
+                    
                 message_placeholder.markdown(display_response + "▌")
-
+                
             # Strip the think tag completely for the final saved message
             if "</think>" in full_response:
                 full_response = full_response.split("</think>")[-1].strip()
-
+                
             message_placeholder.markdown(full_response)
             st.session_state.messages.append({"role": "assistant", "content": full_response})
-
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
+            
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
