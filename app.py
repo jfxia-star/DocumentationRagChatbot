@@ -14,16 +14,15 @@ st.caption("Optimized for accuracy with Qwen 2.5 (1.5B) & Precision Markdown Spl
 # 1. Initialize RAG Chain with Caching
 @st.cache_resource
 def initialize_rag_chain():
-    os.chdir(r"C:\Users\jfxia\AI Projects\Chatbot")
-    
+    # Looks for the file directly inside your root GitHub repository folder
     if not os.path.exists("Documentation.md"):
-        st.error("Could not find Documentation.md file.")
+        st.error("Could not find Documentation.md file in the GitHub repository. Please make sure you uploaded it!")
         st.stop()
         
     with open("Documentation.md", "r", encoding="utf-8") as f:
         raw_text = f.read()
 
-    # MATCHED TO YOUR EXACT FORMAT: Splitting logically by your main sections and item sub-headers
+    # Logical splitting configured for markdown layout
     headers_to_split_on = [
         ("###", "Main Section"),
         ("#####", "Sub Item")
@@ -35,18 +34,11 @@ def initialize_rag_chain():
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=150)
     splits = text_splitter.split_documents(md_header_splits)
 
-    # Core AI and vector store linking
-    # embeddings = OllamaEmbeddings(model="nomic-embed-text", base_url="http://127.0.0.1:11434")
-    # db = FAISS.from_documents(splits, embeddings)
-    
-    # 1.5B model for high-speed technical reasoning
-    # llm = OllamaLLM(model="qwen2.5:1.5b", base_url="http://127.0.0.1:11434")
-
-    # New Cloud Version
+    # New Cloud Imports
     from langchain_groq import ChatGroq
     from langchain_community.embeddings import HuggingFaceEmbeddings
 
-    # Free, serverless embeddings that run completely inside the cloud container
+    # Free, serverless embeddings running completely inside the cloud container
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     db = FAISS.from_documents(splits, embeddings)
 
@@ -66,9 +58,6 @@ def initialize_rag_chain():
         ("human", "{question}"),
     ])
 
-    def format_docs(documents):
-        return "\n\n".join(doc.page_content for doc in documents)
-
     # Compile the final chain pipeline
     chain = (
         {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
@@ -81,7 +70,7 @@ def initialize_rag_chain():
 try:
     rag_chain, vector_db = initialize_rag_chain()
 except Exception as e:
-    st.error(f"Failed to connect to Ollama. Make sure the app is running! Error: {e}")
+    st.error(f"Failed to initialize the cloud RAG chain. Error: {e}")
     st.stop()
 
 # 2. ULTRA-COMPACT SIDEBAR WITH PORTFOLIO SIGNATURE
@@ -93,17 +82,17 @@ with st.sidebar:
             "This interactive **Retrieval-Augmented Generation (RAG)** chatbot "
             "acts as an intelligent assistant for specialized internal project documentation.\n\n"
             "**How It Works:**\n"
-            "1. **Parsing:** Reads a local raw markdown file.\n"
-            "2. **Vector Search:** Converts text chunks into vectors using `nomic-embed-text`.\n"
-            "3. **Inference:** Queries Meta's `Qwen 2.5 (1.5B)` model via **Ollama** completely offline."
+            "1. **Parsing:** Reads the markdown file from the GitHub repository.\n"
+            "2. **Vector Search:** Converts text chunks into vectors inside the cloud app container using HuggingFace.\n"
+            "3. **Inference:** Streams responses from Meta's high-speed `Qwen 2.5 (1.5B)` model hosted via **Groq**."
         )
     
     st.markdown(
         "<div style='margin-top: 5px; margin-bottom: 5px; padding: 0px; font-size: 14px; line-height: 1.3;'>"
         "<strong>Tech Stack:</strong><br>"
         "• Parsing: Markdown Header Splits<br>"
-        "• Vectors: <code>nomic-embed-text</code><br>"
-        "• LLM: <code>Qwen 2.5 (1.5B)</code> via Ollama<br><br>"
+        "• Vectors: <code>all-MiniLM-L6-v2</code><br>"
+        "• LLM: <code>Qwen 2.5 (1.5B)</code> via Groq Cloud<br><br>"
         "<strong>💡 Sample Prompt:</strong><br>"
         "<em>'Summarize the AI involvement'</em>"
         "</div>", 
