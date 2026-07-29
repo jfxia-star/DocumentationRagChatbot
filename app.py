@@ -42,9 +42,10 @@ def initialize_rag_chain():
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     db = FAISS.from_documents(splits, embeddings)
 
-    # Connects to high-speed model on Groq's servers using your hidden API Key
+    # Dynamic cloud settings pulled directly from your Streamlit Advanced Settings
     api_key = st.secrets["GROQ_API_KEY"]
-    llm = ChatGroq(model="qwen/qwen3.6-27b", groq_api_key=api_key)
+    model_name = st.secrets["GROQ_MODEL_NAME"]
+    llm = ChatGroq(model=model_name, groq_api_key=api_key)
 
     system_prompt = (
         "You are an expert technical documentation assistant.\n"
