@@ -1,8 +1,5 @@
 streamlit
-langchain
-langchain-core
-langchain-text-splitters
+langchain-groq
 langchain-community
 faiss-cpu
-langchain-groq
 sentence-transformers
